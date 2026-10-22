@@ -68,11 +68,8 @@ h1 { margin: 0; font-size: 30px; line-height: 1.4; font-weight: 600; letter-spac
 .item-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 17px; padding-bottom: 54px; }
 .item-card { min-width: 0; background: var(--paper); border: 1px solid #e9e9e1; border-radius: 7px; overflow: hidden; box-shadow: 0 2px 8px #36433208; transition: transform .16s ease, box-shadow .16s ease; cursor: pointer; }
 .item-card:hover { transform: translateY(-2px); box-shadow: 0 7px 18px #36433212; }
-.card-photo { position: relative; height: 165px; overflow: hidden; background: #eeeee5; }
-.card-photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.photo-placeholder { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; color: #9ca395; background: linear-gradient(145deg, #eeefe7, #e8eae0); }
-.photo-placeholder > span { display: grid; place-items: center; width: 37px; height: 37px; border: 1px solid #d8ddd2; border-radius: 50%; font-size: 22px; line-height: 1; font-weight: 300; }
-.photo-placeholder small { font-size: 11px; }
+.card-photo { position: relative; height: 165px; overflow: hidden; display: grid; place-items: center; background: #eff0e9; }
+.item-emoji { display: grid; place-items: center; width: 100%; height: 100%; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; font-size: 76px; line-height: 1; }
 .category-tag { position: absolute; top: 11px; left: 11px; z-index: 1; background: #fffefaee; border: 1px solid #ffffff; color: #6b7768; border-radius: 4px; padding: 5px 8px; font-size: 10px; }
 .card-body { padding: 14px 15px 13px; }
 .card-title-row { display: flex; gap: 10px; align-items: center; justify-content: space-between; }
@@ -96,18 +93,12 @@ h1 { margin: 0; font-size: 30px; line-height: 1.4; font-weight: 600; letter-spac
 .dialog-heading h2 { margin: 0; font-size: 20px; font-weight: 600; }
 .icon-button { width: 32px; height: 32px; border: 0; border-radius: 5px; background: transparent; color: #818a7e; font-size: 26px; line-height: 1; }
 .icon-button:hover { background: #f0f1ea; }
-.photo-picker { display: flex; align-items: center; gap: 15px; padding: 12px; border: 1px solid #e9eae2; border-radius: 6px; margin-bottom: 18px; }
-.photo-preview { position: relative; overflow: hidden; width: 92px; height: 76px; border-radius: 5px; background: #eff0e9; flex: none; }
-.photo-preview img { width: 100%; height: 100%; object-fit: cover; }
-.photo-preview .photo-placeholder > span { width: 27px; height: 27px; font-size: 17px; }
-.photo-preview .photo-placeholder small { font-size: 9px; }
-.photo-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
-.photo-actions strong { font-size: 12px; font-weight: 600; }
-.photo-actions > span { margin-bottom: 4px; color: #959b90; font-size: 10px; }
-.photo-button-row { display: flex; gap: 4px; }
-.file-button { height: 30px; padding: 0 10px; font-size: 10px; }
-.file-button[hidden] { display: none; }
-#photo-input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.emoji-picker { min-width: 0; padding: 0; border: 0; margin: 0 0 19px; }
+.emoji-picker legend { margin-bottom: 9px; color: #667064; font-size: 11px; font-weight: 600; }
+.emoji-options { display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); gap: 5px; }
+.emoji-option { display: grid; place-items: center; aspect-ratio: 1; min-width: 0; padding: 0; border: 1px solid #e8e9e1; border-radius: 5px; background: #fff; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; font-size: 22px; }
+.emoji-option:hover { background: #f0f2ea; }
+.emoji-option.selected { border-color: #66816b; background: #e8eee5; box-shadow: 0 0 0 1px #66816b; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 13px; }
 .field { display: flex; flex-direction: column; gap: 7px; min-width: 0; color: #667064; font-size: 11px; font-weight: 600; }
 .field i { color: #bd7b5f; font-style: normal; }
@@ -119,9 +110,8 @@ h1 { margin: 0; font-size: 30px; line-height: 1.4; font-weight: 600; letter-spac
 .form-error { min-height: 18px; margin: 8px 0 0; color: #b15f4c; font-size: 11px; }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 7px; padding-top: 9px; border-top: 1px solid #ecece5; }
 .detail-panel { padding: 0; overflow: hidden; }
-.detail-hero { position: relative; height: 225px; background: #ededdf; }
-.detail-hero img { width: 100%; height: 100%; object-fit: cover; }
-.detail-hero .photo-placeholder { position: absolute; }
+.detail-hero { position: relative; height: 225px; display: grid; place-items: center; background: #eff0e9; }
+.detail-hero .item-emoji { font-size: 104px; }
 .detail-top-actions { position: absolute; top: 12px; right: 12px; display: flex; gap: 7px; }
 .detail-top-actions .icon-button { background: #fffefaed; }
 .detail-content { padding: 22px 25px 25px; }
@@ -194,8 +184,8 @@ h1 { margin: 0; font-size: 30px; line-height: 1.4; font-weight: 600; letter-spac
   .dialog { width: calc(100% - 20px); max-height: 94vh; }
   .dialog-panel { padding: 20px 17px; max-height: 94vh; }
   .dialog-heading h2 { font-size: 18px; }
-  .photo-picker { gap: 11px; padding: 9px; }
-  .photo-preview { width: 78px; height: 68px; }
+  .emoji-options { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+  .emoji-option { font-size: 23px; }
   .form-grid { gap: 12px 9px; }
   .field { font-size: 10px; }
   .field input, .field select, .field textarea { font-size: 12px; }

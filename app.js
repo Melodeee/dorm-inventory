@@ -1,5 +1,6 @@
 const DEFAULT_CATEGORIES = ["衣物", "书籍资料", "文具", "电子产品", "洗漱用品", "护肤化妆", "食品零食", "清洁用品", "生活杂物", "其他"];
-const state = { items: [], categories: [...DEFAULT_CATEGORIES], locations: [], activeCategory: "all", activeLocation: "all", query: "", editingId: null, draftPhoto: null };
+const ITEM_ICONS = ["📦", "👕", "👟", "👜", "📚", "✏️", "📱", "💻", "🎧", "🔌", "🪥", "🧴", "💄", "🥤", "🍪", "🧹", "🧺", "🧸", "🔑", "🪴", "💊", "🎒"];
+const state = { items: [], categories: [...DEFAULT_CATEGORIES], locations: [], activeCategory: "all", activeLocation: "all", query: "", editingId: null, draftIcon: ITEM_ICONS[0] };
 const $ = (selector) => document.querySelector(selector);
 const itemGrid = $("#item-grid");
 const categoryFilter = $("#category-filter");
@@ -8,12 +9,8 @@ const categoryList = $("#category-list");
 const itemDialog = $("#item-dialog");
 const detailDialog = $("#detail-dialog");
 const itemForm = $("#item-form");
-const photoInput = $("#photo-input");
 let toastTimer;
 let database;
-let previewBlob = null;
-let previewUrl = null;
-const photoUrls = new Map();
 
 function openDatabase() {
   return new Promise((resolve, reject) => {
@@ -96,17 +93,6 @@ function renderLocationOptions() {
     : `<span class="location-empty">记录过位置后会显示在这里</span>`;
 }
 
-function photoUrl(item) {
-  if (!item.photo) return null;
-  if (typeof item.photo === "string") return item.photo;
-  const cached = photoUrls.get(item.id);
-  if (cached?.blob === item.photo) return cached.url;
-  if (cached) URL.revokeObjectURL(cached.url);
-  const url = URL.createObjectURL(item.photo);
-  photoUrls.set(item.id, { blob: item.photo, url });
-  return url;
-}
-
 function escapeHtml(value = "") {
   return String(value).replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
 }
@@ -115,14 +101,7 @@ function locationIcon() {
   return '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 8.4c0 4.1-6 9-6 9s-6-4.9-6-9a6 6 0 1 1 12 0Z"/><circle cx="10" cy="8" r="2"/></svg>';
 }
 
-function placeholder() {
-  return '<div class="photo-placeholder"><span>＋</span><small>还没有照片</small></div>';
-}
-
-function photoMarkup(item) {
-  const source = photoUrl(item);
-  return source ? `<img src="${escapeHtml(source)}" alt="${escapeHtml(item.name)}" />` : placeholder();
-}
+function iconMarkup(item) { return `<span class="item-emoji" aria-hidden="true">${escapeHtml(item.icon || ITEM_ICONS[0])}</span>`; }
 
 function initCategoryOptions() {
   renderCategoryOptions();
@@ -152,7 +131,7 @@ function render() {
     return;
   }
   itemGrid.innerHTML = items.map((item) => `<article class="item-card" tabindex="0" data-id="${escapeHtml(item.id)}" aria-label="${escapeHtml(item.name)}，${escapeHtml(item.location || "尚未记录位置")}">
-    <div class="card-photo">${photoMarkup(item)}<span class="category-tag">${escapeHtml(item.category)}</span></div>
+    <div class="card-photo">${iconMarkup(item)}<span class="category-tag">${escapeHtml(item.category)}</span></div>
     <div class="card-body"><div class="card-title-row"><h2 class="card-title">${escapeHtml(item.name)}</h2><span class="quantity">× ${item.quantity}</span></div>
       <p class="card-location">${locationIcon()}<span>${escapeHtml(item.location || "尚未记录位置")}</span></p></div>
     </article>`).join("");
@@ -178,19 +157,13 @@ function showToast(message) {
   toastTimer = setTimeout(() => toast.classList.remove("show"), 2100);
 }
 
-function setPhotoPreview(photo) {
-  const preview = $("#photo-preview");
-  if (previewBlob !== photo && previewUrl) URL.revokeObjectURL(previewUrl);
-  previewBlob = photo;
-  previewUrl = photo && typeof photo !== "string" ? URL.createObjectURL(photo) : null;
-  const source = !photo ? null : typeof photo === "string" ? photo : previewUrl;
-  preview.innerHTML = source ? `<img src="${escapeHtml(source)}" alt="照片预览" />` : '<span class="photo-placeholder"><span>＋</span><small>添加照片</small></span>';
-  $("#remove-photo").hidden = !photo;
+function renderIconOptions() {
+  $("#emoji-options").innerHTML = ITEM_ICONS.map((icon) => `<button class="emoji-option${state.draftIcon === icon ? " selected" : ""}" type="button" role="radio" aria-checked="${state.draftIcon === icon}" aria-label="${escapeHtml(icon)}" data-icon="${escapeHtml(icon)}">${icon}</button>`).join("");
 }
 
 function openForm(item = null) {
   state.editingId = item?.id ?? null;
-  state.draftPhoto = item?.photo ?? null;
+  state.draftIcon = ITEM_ICONS.includes(item?.icon) ? item.icon : ITEM_ICONS[0];
   itemForm.reset();
   $("#dialog-title").textContent = item ? "编辑物品" : "添加一件物品";
   $("#name-input").value = item?.name ?? "";
@@ -199,8 +172,7 @@ function openForm(item = null) {
   $("#location-input").value = item?.location ?? "";
   $("#note-input").value = item?.note ?? "";
   $("#form-error").textContent = "";
-  photoInput.value = "";
-  setPhotoPreview(state.draftPhoto);
+  renderIconOptions();
   detailDialog.close();
   itemDialog.showModal();
   setTimeout(() => $("#name-input").focus(), 0);
@@ -209,7 +181,7 @@ function openForm(item = null) {
 function showDetail(id) {
   const item = state.items.find((record) => record.id === id);
   if (!item) return;
-  $("#detail-content").innerHTML = `<div class="detail-hero">${photoMarkup(item)}<div class="detail-top-actions"><button class="icon-button" id="edit-item" type="button" aria-label="编辑">✎</button><button class="icon-button" id="delete-item" type="button" aria-label="删除">⌫</button><button class="icon-button" id="close-detail" type="button" aria-label="关闭">×</button></div></div>
+  $("#detail-content").innerHTML = `<div class="detail-hero">${iconMarkup(item)}<div class="detail-top-actions"><button class="icon-button" id="edit-item" type="button" aria-label="编辑">✎</button><button class="icon-button" id="delete-item" type="button" aria-label="删除">⌫</button><button class="icon-button" id="close-detail" type="button" aria-label="关闭">×</button></div></div>
     <div class="detail-content"><h2>${escapeHtml(item.name)}</h2><p class="detail-meta">${escapeHtml(item.category)} · 数量 ${item.quantity}</p><div class="detail-location">${locationIcon()}<span>${escapeHtml(item.location || "尚未记录位置")}</span></div>${item.note ? `<p class="detail-note">${escapeHtml(item.note)}</p>` : ""}<p class="detail-stamp">添加于 ${new Date(item.createdAt).toLocaleDateString("zh-CN")}</p></div>`;
   detailDialog.showModal();
   $("#close-detail").addEventListener("click", () => detailDialog.close());
@@ -223,9 +195,6 @@ function showDetail(id) {
       return;
     }
     state.items = state.items.filter((record) => record.id !== item.id);
-    const cached = photoUrls.get(item.id);
-    if (cached) URL.revokeObjectURL(cached.url);
-    photoUrls.delete(item.id);
     detailDialog.close();
     render();
     showToast("物品已删除");
@@ -434,41 +403,11 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && itemDialog.open) { itemDialog.close(); }
 });
 
-async function compressImage(file) {
-  const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-  canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  bitmap.close();
-  for (const quality of [0.84, 0.72, 0.6]) {
-    const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/webp", quality));
-    if (!blob) throw new Error("图片压缩失败");
-    if (blob.size <= 1.5 * 1024 * 1024) return blob;
-  }
-  throw new Error("这张图片压缩后仍然过大，请选择尺寸较小的图片。");
-}
-
-photoInput.addEventListener("change", async () => {
-  const file = photoInput.files?.[0];
-  if (!file) return;
-  if (!/^image\/(jpeg|png|webp)$/.test(file.type)) { $("#form-error").textContent = "请选择 JPG、PNG 或 WebP 图片。"; photoInput.value = ""; return; }
-  if (file.size > 8 * 1024 * 1024) { $("#form-error").textContent = "图片不能超过 8 MB。"; photoInput.value = ""; return; }
-  try {
-    state.draftPhoto = await compressImage(file);
-    setPhotoPreview(state.draftPhoto);
-    $("#form-error").textContent = "";
-  } catch (error) {
-    $("#form-error").textContent = error.message || "读取图片失败，请重新选择。";
-    photoInput.value = "";
-  }
-});
-
-$("#remove-photo").addEventListener("click", () => {
-  state.draftPhoto = null;
-  photoInput.value = "";
-  setPhotoPreview(null);
+$("#emoji-options").addEventListener("click", (event) => {
+  const button = event.target.closest("[data-icon]");
+  if (!button) return;
+  state.draftIcon = button.dataset.icon;
+  renderIconOptions();
 });
 
 itemForm.addEventListener("submit", async (event) => {
@@ -480,17 +419,12 @@ itemForm.addEventListener("submit", async (event) => {
   if (!$("#quantity-input").value || !Number.isInteger(quantity) || quantity < 1) { $("#form-error").textContent = "数量需要是大于或等于 1 的整数。"; $("#quantity-input").focus(); return; }
   const now = new Date().toISOString();
   const existing = state.items.find((item) => item.id === state.editingId);
-  const record = { id: existing?.id ?? crypto.randomUUID(), name, category: $("#category-input").value, quantity, location: $("#location-input").value.trim(), note: $("#note-input").value.trim(), photo: state.draftPhoto, createdAt: existing?.createdAt ?? now, updatedAt: now };
+  const record = { id: existing?.id ?? crypto.randomUUID(), name, category: $("#category-input").value, quantity, location: $("#location-input").value.trim(), note: $("#note-input").value.trim(), icon: state.draftIcon, createdAt: existing?.createdAt ?? now, updatedAt: now };
   const saveButton = itemForm.querySelector('[type="submit"]');
   saveButton.disabled = true;
   try {
     await saveItem(record);
     state.items = existing ? state.items.map((item) => item.id === existing.id ? record : item) : [record, ...state.items];
-    if (existing?.photo && existing.photo !== record.photo) {
-      const cached = photoUrls.get(existing.id);
-      if (cached) URL.revokeObjectURL(cached.url);
-      photoUrls.delete(existing.id);
-    }
     itemDialog.close();
     render();
     showToast(existing ? "物品信息已更新" : "物品已添加");

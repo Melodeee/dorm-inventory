@@ -71,10 +71,7 @@
           <div><p class="eyebrow">YOUR INVENTORY</p><h2 id="dialog-title">添加一件物品</h2></div>
           <button class="icon-button" type="button" id="close-dialog" aria-label="关闭">×</button>
         </div>
-        <div class="photo-picker">
-          <div class="photo-preview" id="photo-preview"><span class="photo-placeholder"><span>＋</span><small>添加照片</small></span></div>
-          <div class="photo-actions"><strong>给物品拍张照</strong><span>可选，支持 JPG、PNG、WebP，最大 8 MB</span><div class="photo-button-row"><label class="button button-secondary file-button" for="photo-input">选择照片</label><button class="button button-quiet file-button" type="button" id="remove-photo" hidden>移除照片</button></div><input id="photo-input" type="file" accept="image/jpeg,image/png,image/webp" /></div>
-        </div>
+        <fieldset class="emoji-picker"><legend>选择物品图标</legend><div class="emoji-options" id="emoji-options" role="radiogroup" aria-label="物品图标"></div></fieldset>
         <div class="form-grid">
           <label class="field field-wide"><span>物品名称 <i>*</i></span><input id="name-input" name="name" required maxlength="60" placeholder="例如：白色充电器" /></label>
           <label class="field"><span>分类 <i>*</i></span><select id="category-input" name="category" required></select></label>
