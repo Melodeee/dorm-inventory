@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f6f5ef" />
+    <title>我的宿舍小仓库</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="我的宿舍小仓库首页">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" fill="none"><path d="M5 14.2 16 5l11 9.2v12.3a1.5 1.5 0 0 1-1.5 1.5h-19A1.5 1.5 0 0 1 5 26.5V14.2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 28V18h8v10M10 13h.01M22 13h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </span>
+          <span class="brand-name">我的宿舍小仓库</span>
+        </a>
+        <div class="topbar-note"><span class="status-dot"></span>只属于你的宿舍清单</div>
+      </header>
+
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">ROOM INVENTORY</p>
+          <h1 id="page-title">每件小物，都有自己的位置。</h1>
+          <p class="intro-copy">把宿舍里的东西收好、记清楚，需要时一搜就找到。</p>
+        </div>
+        <button class="button button-primary" id="add-item" type="button">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12" /></svg>
+          <span>添加物品</span>
+        </button>
+      </section>
+
+      <section class="inventory" aria-label="物品清单">
+        <div class="inventory-toolbar">
+          <label class="search-box" for="search-input">
+            <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.8" cy="8.8" r="5.8"/><path d="m13.2 13.2 4 4"/></svg>
+            <input id="search-input" type="search" placeholder="搜物品、位置或备注" autocomplete="off" />
+            <kbd>⌘ K</kbd>
+          </label>
+          <div class="toolbar-side">
+            <label class="select-wrap" for="category-filter">
+              <span class="sr-only">按分类筛选</span>
+              <select id="category-filter">
+                <option value="all">全部分类</option>
+              </select>
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4"/></svg>
+            </label>
+            <button class="manage-categories" id="manage-categories" type="button">管理分类</button>
+            <span class="item-count" id="item-count">0 件物品</span>
+          </div>
+        </div>
+
+        <div class="category-list" id="category-list" aria-label="快速筛选分类"></div>
+        <div class="location-toolbar" aria-label="按存放位置筛选">
+          <div class="location-list" id="location-list"></div>
+          <button class="manage-categories" id="manage-locations" type="button">管理位置</button>
+        </div>
+        <div id="item-grid" class="item-grid" aria-live="polite"></div>
+      </section>
+
+      <footer class="page-footer">
+        <span>小小的宿舍，也值得被好好收纳。</span>
+        <span class="local-note"><span aria-hidden="true">●</span>数据保存在这台设备的浏览器中</span>
+      </footer>
+    </main>
+
+    <dialog id="item-dialog" class="dialog">
+      <form id="item-form" class="dialog-panel" novalidate>
+        <div class="dialog-heading">
+          <div><p class="eyebrow">YOUR INVENTORY</p><h2 id="dialog-title">添加一件物品</h2></div>
+          <button class="icon-button" type="button" id="close-dialog" aria-label="关闭">×</button>
+        </div>
+        <div class="photo-picker">
+          <div class="photo-preview" id="photo-preview"><span class="photo-placeholder"><span>＋</span><small>添加照片</small></span></div>
+          <div class="photo-actions"><strong>给物品拍张照</strong><span>可选，支持 JPG、PNG、WebP，最大 8 MB</span><div class="photo-button-row"><label class="button button-secondary file-button" for="photo-input">选择照片</label><button class="button button-quiet file-button" type="button" id="remove-photo" hidden>移除照片</button></div><input id="photo-input" type="file" accept="image/jpeg,image/png,image/webp" /></div>
+        </div>
+        <div class="form-grid">
+          <label class="field field-wide"><span>物品名称 <i>*</i></span><input id="name-input" name="name" required maxlength="60" placeholder="例如：白色充电器" /></label>
+          <label class="field"><span>分类 <i>*</i></span><select id="category-input" name="category" required></select></label>
+          <label class="field"><span>数量 <i>*</i></span><input id="quantity-input" name="quantity" type="number" min="1" step="1" value="1" required /></label>
+          <label class="field field-wide"><span>存放位置</span><input id="location-input" name="location" maxlength="120" placeholder="例如：衣柜 → 第二层 → 白色收纳盒" /></label>
+          <label class="field field-wide"><span>备注</span><textarea id="note-input" name="note" maxlength="300" rows="3" placeholder="颜色、型号或其他好辨认的信息"></textarea></label>
+        </div>
+        <p class="form-error" id="form-error" role="alert"></p>
+        <div class="dialog-actions"><button class="button button-quiet" type="button" id="cancel-dialog">取消</button><button class="button button-primary" type="submit">保存物品</button></div>
+      </form>
+    </dialog>
+
+    <dialog id="detail-dialog" class="dialog">
+      <div class="dialog-panel detail-panel" id="detail-content"></div>
+    </dialog>
+    <dialog id="categories-dialog" class="dialog category-dialog">
+      <section class="dialog-panel">
+        <div class="dialog-heading">
+          <div><p class="eyebrow">ORGANIZE YOUR ROOM</p><h2>管理物品分类</h2></div>
+          <button class="icon-button" type="button" id="close-categories" aria-label="关闭">×</button>
+        </div>
+        <form class="category-create" id="category-create-form">
+          <label class="sr-only" for="new-category-name">新分类名称</label>
+          <input id="new-category-name" maxlength="20" placeholder="输入新分类名称" autocomplete="off" />
+          <button class="button button-primary" type="submit">添加分类</button>
+        </form>
+        <p class="category-error" id="category-error" role="alert"></p>
+        <div class="category-manage-list" id="category-manage-list"></div>
+        <p class="category-hint">删除正在使用的分类时，相关物品会移至“其他”。“其他”分类始终保留。</p>
+      </section>
+    </dialog>
+    <dialog id="locations-dialog" class="dialog category-dialog">
+      <section class="dialog-panel">
+        <div class="dialog-heading">
+          <div><p class="eyebrow">ORGANIZE YOUR ROOM</p><h2>管理存放位置</h2></div>
+          <button class="icon-button" type="button" id="close-locations" aria-label="关闭">×</button>
+        </div>
+        <form class="category-create" id="location-create-form">
+          <label class="sr-only" for="new-location-name">新存放位置</label>
+          <input id="new-location-name" maxlength="120" placeholder="输入位置名称或路径" autocomplete="off" />
+          <button class="button button-primary" type="submit">添加位置</button>
+        </form>
+        <p class="category-error" id="location-error" role="alert"></p>
+        <div class="category-manage-list" id="location-manage-list"></div>
+        <p class="category-hint">位置可使用层级路径，例如“衣柜 → 第二层 → 白色收纳盒”。改名会同步更新物品的位置。</p>
+      </section>
+    </dialog>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="app.js" defer></script>
+  </body>
+</html>
