@@ -164,14 +164,15 @@ h1 { margin: 0; font-size: 30px; line-height: 1.4; font-weight: 600; letter-spac
   .manage-categories { padding-left: 8px; font-size: 10px; }
   .item-count { min-width: 53px; font-size: 11px; }
   .select-wrap select { padding-left: 0; }
-  .category-list { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 15px; margin-right: -17px; padding-right: 17px; scrollbar-width: none; }
+  .category-list { display: flex; width: calc(100% + 17px); min-height: 39px; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; padding: 0 17px 12px 0; margin-right: -17px; scrollbar-width: none; -webkit-overflow-scrolling: touch; touch-action: pan-x; }
   .category-list::-webkit-scrollbar { display: none; }
   .category-chip { flex: none; }
-  .location-toolbar { align-items: flex-start; gap: 6px; flex-wrap: wrap; margin: -5px 0 15px; }
-  .location-list { flex-basis: calc(100% - 70px); flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+  .location-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px; min-height: 42px; margin: -5px 0 15px; padding: 5px 0 10px; }
+  .location-list { grid-column: 1; grid-row: 1; width: 100%; min-height: 22px; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; padding: 2px 0; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
   .location-list::-webkit-scrollbar { display: none; }
   .location-chip { flex: none; max-width: 190px; }
-  .location-toolbar > .manage-categories { margin-left: auto; border-left: 0; padding: 3px 0; }
+  .location-toolbar > .manage-categories { grid-column: 2; grid-row: 1; margin-left: 0; border-left: 0; padding: 3px 0; }
+  .location-empty { display: block; min-width: max-content; white-space: nowrap; color: #7f897c; font-size: 11px; }
   .item-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding-bottom: 35px; }
   .card-photo { height: auto; aspect-ratio: 1.16; }
   .card-body { padding: 11px 10px 11px; }
